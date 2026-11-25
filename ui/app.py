@@ -5,8 +5,9 @@ import torch
 import sys, os
 from PIL import Image, ImageDraw, ImageFont
 
-sys.path.append("D:\\ReliableMultimodalAI\\src\\fusion")
-sys.path.append("D:\\ReliableMultimodalAI\\src\\agent")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(BASE_DIR, "src", "fusion"))
+sys.path.append(os.path.join(BASE_DIR, "src", "agent"))
 
 from multimodal_fusion import ecg_class_map, bp_scaler, glucose_scaler, fuse_modalities, ecg_models, device
 from coordinator_agent import CoordinatorAgent
@@ -37,7 +38,7 @@ st.markdown("""
 st.title("🫀 Reliability-Aware Multimodal AI for Physiological Assessment")
 st.caption("ECG + Blood Pressure + Glucose | Agentic AI reasoning with explicit reliability checks | Research Prototype — Not for Clinical Use")
 
-DATA_DIR = "D:\\ReliableMultimodalAI\\data\\"
+DATA_DIR = os.path.join(BASE_DIR, "data") + os.sep
 EXPECTED_LEADS = 12
 EXPECTED_SAMPLES = 1000
 LEAD_NAMES = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"]
@@ -261,8 +262,8 @@ with tab_ecg:
 
         if ecg_mode == "Use a sample from test set":
             st.caption("Select a sample ECG record from the test set to simulate a patient")
-            X_ecg_test = np.load(DATA_DIR + "splits\\ecg5_X_demo.npy")
-            y_ecg_test = np.load(DATA_DIR + "splits\\ecg5_y_demo.npy")
+            X_ecg_test = np.load(DATA_DIR + "splits/ecg5_X_demo.npy")
+            y_ecg_test = np.load(DATA_DIR + "splits/ecg5_y_demo.npy")
             inv_class_map = {v: k for k, v in ecg_class_map.items()}
 
             sample_idx = st.slider("ECG Sample Index", 0, len(X_ecg_test) - 1, 0)
