@@ -1,0 +1,33 @@
+# Raw/training-only data — not needed for the deployed app
+data/raw/
+data/ecg_images/
+data/ecg_images.zip
+data/splits/ecg5_X_train.npy
+data/splits/ecg5_X_val.npy
+data/splits/ecg5_X_test.npy
+data/splits/ecg_X_train.npy
+data/splits/ecg_X_val.npy
+data/splits/ecg_X_test.npy
+data/splits/glucose_X_train.npy
+data/splits/glucose_y_train.npy
+
+# Unused image-CNN model (comparison feature was removed)
+models_saved/ecg_image_model.pth
+
+# Python/venv junk
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# One-off write/debug scripts, not needed for the app
+write_coordinator.py
+write_coordinator_v2.py
+write_coordinator_v3.py
+write_explanation_agent_v2.py
+write_explanation_agent_v3.py
+check_fusion_keys.py
+test_ecg_image_agent.py
+preview_ecg_image.py
+sample_ecg_image_preview.png
+generate_ecg_images.py
