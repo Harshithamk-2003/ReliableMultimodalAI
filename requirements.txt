@@ -4,3 +4,4 @@ pandas
 torch
 pillow
 scikit-learn
+lightgbm
