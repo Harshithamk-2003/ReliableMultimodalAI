@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import joblib
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -9,8 +10,10 @@ from sklearn.model_selection import train_test_split
 # PART 1 — Load all trained models
 # ──────────────────────────────────────────────────────────
 
-MODELS_DIR = "D:\\ReliableMultimodalAI\\models_saved\\"
-DATA_DIR   = "D:\\ReliableMultimodalAI\\data\\"
+
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MODELS_DIR = os.path.join(_BASE_DIR, "models_saved") + os.sep
+DATA_DIR   = os.path.join(_BASE_DIR, "data") + os.sep
 
 print("Loading trained models...")
 

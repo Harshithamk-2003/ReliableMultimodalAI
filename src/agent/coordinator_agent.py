@@ -1,5 +1,7 @@
 import sys
-sys.path.append("D:\\ReliableMultimodalAI\\src\\fusion")
+import os
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(_BASE_DIR, "src", "fusion"))
 from multimodal_fusion import (
     glucose_model, glucose_scaler, bp_model, bp_scaler,
     ecg_models, ecg_class_map, device, fuse_modalities
