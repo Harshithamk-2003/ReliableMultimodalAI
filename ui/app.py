@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import torch
 import sys, os
+import datetime
+import uuid
 from PIL import Image, ImageDraw, ImageFont
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -12,31 +14,85 @@ sys.path.append(os.path.join(BASE_DIR, "src", "agent"))
 from multimodal_fusion import ecg_class_map, bp_scaler, glucose_scaler, fuse_modalities, ecg_models, device
 from coordinator_agent import CoordinatorAgent
 
-st.set_page_config(page_title="Multimodal Cardiometabolic AI", layout="wide", page_icon="🫀")
+st.set_page_config(page_title="CardioMetabolic AI", layout="wide", page_icon="🫀")
 
 # ───────────────────────── Global style ─────────────────────────
 st.markdown("""
 <style>
+.stApp {
+    background: linear-gradient(180deg, #0b1526 0%, #0f1f38 100%);
+}
+section[data-testid="stSidebar"] {
+    background: #0a1222;
+}
+.hero-banner {
+    background: linear-gradient(120deg, #0d2140 0%, #123a5e 55%, #0f2e52 100%);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 18px;
+    padding: 26px 32px;
+    margin-bottom: 22px;
+    box-shadow: 0 0 40px rgba(0,180,255,0.08);
+}
+.hero-title {
+    font-size: 2.1rem; font-weight: 800; color: #eaf6ff; margin-bottom: 2px;
+    letter-spacing: 0.3px;
+}
+.hero-sub {
+    font-size: 1.0rem; color: #7fd8ff; font-weight: 500; margin-bottom: 6px;
+}
+.hero-tag {
+    font-size: 0.85rem; color: #9fb4cc;
+}
+.status-pill {
+    display:inline-block; padding:4px 12px; border-radius:999px;
+    background: rgba(40,220,140,0.15); color:#38e08a; font-weight:600; font-size:0.8rem;
+    border: 1px solid rgba(40,220,140,0.35);
+}
+.card {
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(120,180,255,0.18);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+}
+.card h4 { margin-top:0; color:#d8ecff; }
 .metric-card {
-    background: var(--background-color, #f7f9fb);
-    border: 1px solid rgba(49,51,63,0.15);
-    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(120,180,255,0.2);
+    border-radius: 12px;
     padding: 14px 18px;
     margin-bottom: 8px;
 }
 .risk-pill {
     display:inline-block; padding:4px 14px; border-radius:999px;
-    font-weight:600; font-size:0.85rem;
+    font-weight:700; font-size:0.85rem; letter-spacing: 0.4px;
 }
-.pill-low    { background:#e3f6e8; color:#1e7a3c; }
-.pill-mod    { background:#fff4d6; color:#9a6b00; }
-.pill-high   { background:#fde3e3; color:#b02a2a; }
-.section-divider { margin: 1.4rem 0 0.6rem 0; }
+.pill-low    { background: rgba(56,224,138,0.15); color:#38e08a; border:1px solid rgba(56,224,138,0.4); }
+.pill-mod    { background: rgba(255,196,0,0.15); color:#ffc400; border:1px solid rgba(255,196,0,0.4); }
+.pill-high   { background: rgba(255,82,82,0.15); color:#ff5252; border:1px solid rgba(255,82,82,0.4); }
+.patient-chip {
+    display:inline-block; background: rgba(120,180,255,0.1); color:#bcdfff;
+    padding: 3px 12px; border-radius: 8px; margin-right:8px; font-size:0.85rem;
+    border: 1px solid rgba(120,180,255,0.25);
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🫀 Reliability-Aware Multimodal AI for Physiological Assessment")
-st.caption("ECG + Blood Pressure + Glucose | Agentic AI reasoning with explicit reliability checks | Research Prototype — Not for Clinical Use")
+now = datetime.datetime.now().strftime("%b %d, %Y • %H:%M")
+
+st.markdown(f"""
+<div class="hero-banner">
+  <div class="hero-title">🫀 CardioMetabolic AI</div>
+  <div class="hero-sub">Reliability-Aware Multimodal Clinical Intelligence Dashboard</div>
+  <div class="hero-tag">Agentic Multimodal AI for Cardiometabolic Risk Assessment · ECG + Blood Pressure + Glucose</div>
+  <div style="margin-top:10px;">
+    <span class="status-pill">● System Ready</span>
+    &nbsp;&nbsp;<span style="color:#7fa8c9; font-size:0.85rem;">{now}</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.caption("Research Prototype — Not for Clinical Use. All scores shown are model estimates, not clinically confirmed diagnoses.")
 
 DATA_DIR = os.path.join(BASE_DIR, "data") + os.sep
 EXPECTED_LEADS = 12
@@ -218,6 +274,40 @@ def load_coordinator():
 
 
 coordinator = load_coordinator()
+
+# ───────────────────────── Patient Information (record-keeping only, not model input) ─────────────────────────
+
+if "patient_id" not in st.session_state:
+    st.session_state["patient_id"] = "PT-" + str(uuid.uuid4())[:6].upper()
+
+st.markdown('<div class="card"><h4>🧾 Patient Information</h4></div>', unsafe_allow_html=True)
+p1, p2, p3, p4, p5 = st.columns([2, 1, 1, 1.4, 1.4])
+with p1:
+    patient_name = st.text_input("Patient Name", value=st.session_state.get("patient_name", ""),
+                                  placeholder="e.g. John Doe")
+with p2:
+    patient_age_display = st.number_input("Age (display only)", 0, 120,
+                                           value=st.session_state.get("patient_age_display", 45))
+with p3:
+    patient_gender = st.selectbox("Gender", ["Male", "Female", "Other"],
+                                   index=["Male", "Female", "Other"].index(st.session_state.get("patient_gender", "Male")))
+with p4:
+    patient_phone = st.text_input("Phone Number", value=st.session_state.get("patient_phone", ""),
+                                   placeholder="e.g. +91 98765 43210")
+with p5:
+    st.text_input("Patient ID (auto-generated)", value=st.session_state["patient_id"], disabled=True)
+
+st.session_state["patient_name"] = patient_name
+st.session_state["patient_age_display"] = patient_age_display
+st.session_state["patient_gender"] = patient_gender
+st.session_state["patient_phone"] = patient_phone
+
+st.caption(
+    "These details are for record-keeping and the report header only — they are not sent to any "
+    "prediction model. Age used in the ECG/BP/Glucose models themselves is entered separately in each tab below."
+)
+
+st.divider()
 
 # ───────────────────────── Sidebar ─────────────────────────
 st.sidebar.header("Select Available Modalities")
@@ -426,7 +516,7 @@ with tab_glucose:
 st.divider()
 
 # ───────────────────────── Run Multi-Agent Assessment ─────────────────────────
-if st.button("Run Multimodal Assessment", type="primary", use_container_width=True):
+if st.button("🔍 Run Multimodal Assessment", type="primary", use_container_width=True):
     ecg_input = ecg_signal if use_ecg else None
     bp_input = bp_features if use_bp else None
     glucose_input = glucose_raw if use_glucose else None
@@ -451,6 +541,34 @@ if st.button("Run Multimodal Assessment", type="primary", use_container_width=Tr
         else:
             escalation = fusion_result.get("escalation", {})
             by_name = {m['name']: m for m in modality_results}
+            fused_score = fusion_result['fused_risk_score']
+
+            # ═══════════════ PATIENT SUMMARY BANNER ═══════════════
+            assess_date = datetime.datetime.now().strftime("%b %d, %Y")
+            risk_label = "Low Risk" if fused_score < 0.33 else ("Moderate Risk" if fused_score < 0.66 else "High Risk")
+            name_display = patient_name if patient_name else "Not provided"
+            phone_display = patient_phone if patient_phone else "Not provided"
+
+            st.markdown(f"""
+<div class="hero-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:18px;">
+  <div>
+    <div style="font-size:1.1rem; font-weight:700; color:#eaf6ff;">👤 {name_display}</div>
+    <div style="margin-top:6px;">
+      <span class="patient-chip">ID: {st.session_state['patient_id']}</span>
+      <span class="patient-chip">Age: {patient_age_display}</span>
+      <span class="patient-chip">Gender: {patient_gender}</span>
+      <span class="patient-chip">Phone: {phone_display}</span>
+      <span class="patient-chip">Date: {assess_date}</span>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div style="color:#9fb4cc; font-size:0.85rem;">Overall Assessment</div>
+    <div style="font-size:1.6rem; font-weight:800; color:#eaf6ff;">{risk_label}</div>
+    {risk_pill_html(fused_score)}
+    <div style="margin-top:4px; color:#7fd8ff; font-size:0.9rem;">Fused Risk Score: {fused_score*100:.1f}%</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
             if escalation.get("triggered"):
                 st.error("⚠ CLINICAL REVIEW RECOMMENDED — AUTOMATIC ESCALATION TRIGGERED")
@@ -565,7 +683,8 @@ if st.button("Run Multimodal Assessment", type="primary", use_container_width=Tr
                           "combines all available evidence while explicitly tracking how much the "
                           "sources agree (conflict) and how much remains unresolved (uncertainty), "
                           "rather than silently averaging them away. The configuration comparison "
-                          "table below shows this empirically for the current patient.")
+                          "table below shows this empirically — it uses real, independently measured "
+                          "accuracy/F1/AUC across patients, not illustrative numbers.")
 
             fc1, fc2, fc3 = st.columns(3)
             with fc1:
@@ -599,9 +718,11 @@ if st.button("Run Multimodal Assessment", type="primary", use_container_width=Tr
             elif fusion_result['is_reliable']:
                 st.success("Modalities show consistent evidence.")
 
-            st.markdown("#### Configuration Comparison for This Patient")
-            st.caption("Shows how the risk assessment changes as more modalities are added — "
-                       "empirical evidence for the value of multimodal fusion on this patient.")
+            st.markdown("#### Configuration Comparison — Real Benchmark Results")
+            st.caption("Shows how risk-assessment accuracy changes as more modalities are added — "
+                       "measured on held-out test patients (not the current patient), using the exact "
+                       "same evaluation for every row. This is the empirical evidence for why multimodal "
+                       "fusion is used.")
 
             configs = [
                 ("ECG alone",           ['ECG']),
