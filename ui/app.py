@@ -25,6 +25,18 @@ st.markdown("""
 section[data-testid="stSidebar"] {
     background: #0a1222;
 }
+/* Force readable light text everywhere on the dark background */
+.stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6,
+.stApp p, .stApp li, .stApp label,
+[data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] *,
+[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] *,
+[data-testid="stWidgetLabel"], [data-testid="stWidgetLabel"] *,
+[data-testid="stMetricValue"], [data-testid="stMetricLabel"],
+[data-testid="stTable"], [data-testid="stTable"] *,
+.stApp .stRadio label, .stApp .stCheckbox label, .stApp .stSelectbox label,
+section[data-testid="stSidebar"] * {
+    color: #eaf6ff !important;
+}
 .hero-banner {
     background: linear-gradient(120deg, #0d2140 0%, #123a5e 55%, #0f2e52 100%);
     border: 1px solid rgba(0,229,255,0.25);
